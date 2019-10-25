@@ -8,7 +8,9 @@ var cookieParser = require('cookie-parser');
 
 var client_id = 'da01e8cca0df4d12a3ec66ff2f62c9e2'; // Your client id
 var client_secret = 'a8b99511d6a1416a8f28f98d008b75ed'; // Your secret
-var redirect_uri = 'http://localhost:8888/callback'; // Your redirect uri
+/*var redirect_uri = 'http://localhost:3000'; // Your redirect uri*/
+var redirect_uri = 'http://localhost:3000/callback'; // Your redirect uri
+
 
 //Generates a random string containing numbers and letters
  
@@ -57,7 +59,7 @@ app.get('/callback', function(req, res) {
   var storedState = req.cookies ? req.cookies[stateKey] : null;
 
   if (state === null || state !== storedState) {
-    res.redirect('/#' +
+    res.redirect('#' +
       querystring.stringify({
         error: 'state_mismatch'
       }));
@@ -94,13 +96,13 @@ app.get('/callback', function(req, res) {
         });
 
         // we can also pass the token to the browser to make requests from there
-        res.redirect('/#' +
+        res.redirect('http://localhost:3000/callback?' +
           querystring.stringify({
             access_token: access_token,
             refresh_token: refresh_token
           }));
       } else {
-        res.redirect('/#' +
+        res.redirect('http://localhost:3000/callback' +
           querystring.stringify({
             error: 'invalid_token'
           }));
@@ -133,5 +135,5 @@ app.get('/refresh_token', function(req, res) {
   });
 });
 
-console.log('Listening on 8888');
-app.listen(8888);
+console.log('Listening on 8080');
+app.listen(3000);
