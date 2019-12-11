@@ -1,15 +1,19 @@
 import React, { Component } from 'react';
 import Particles from 'react-particles-js';
 import './App.css';
-//import SubmitButton from '../Button/SubmitButton';
-import queryString from 'query-string';
-import Spotify from 'spotify-web-api-js';
+import Spotify from '../util/Spotify/Spotify';
 import InputForm from '../components/InputForm/InputForm';
-import Cards from '../components/Card/Cards';
+import queryString from 'query-string';
+import TrackList from '../components/TrackList/TrackList';
+import 'tachyons';
 
-const SpotifyWebApi = new Spotify();
 
-
+let selected_genre;
+let	valence;
+let	danceability;
+let tempo;
+let accessToken;
+let topArtistsIDs;
 
 const particlesOptions = {
  
@@ -64,143 +68,157 @@ const particlesOptions = {
 	    }
 }
 class App extends Component{
-	constructor(){
-		super();
-		let parsed = queryString.parse(window.location.hash);
-		let accessToken = parsed.access_token;
+	constructor(props){
+		super(props);
 		this.state ={
-			loggedIn: accessToken ? true : false,
+			//loggedIn: accessToken ? true : false,
 			mood: '',
 			resolution:'',
-			genre: ''
+			genre: '',
+			danceability: '',
+			"searchResults": [],
+			"topArtistsIDs": []
+			
 		}
-		if(accessToken){
-			SpotifyWebApi.setAccessToken(accessToken)
-			console.log(accessToken);
 		}
-		}
-
+	
 	onMoodSelect = (event) => {
-		this.setState({mood: event.target.value})
-		console.log(event.target.value);
+		this.setState({mood: event.target.value}, function () {
+   		 console.log(this.state.mood);
+	})
 	};
+
 	onResolutionSelect = (event) =>{
-		this.setState({resolution: event.target.value})
-		console.log(event.target.value);
+		this.setState({resolution: event.target.value},function () {
+			let resolution = this.state.resolution;
+			if(resolution === 'Even sadder'){
+				valence = 0.1;
+				danceability = 0.1;
+			}
+
+			else if(resolution === 'Dance'){
+				valence = 0.9;
+				danceability = 0.9;
+			}
+			else if(resolution == 'Mellow'){
+				tempo = 60;
+			}
+    	
+});
 	};
+
 	onGenreSelect = (event) => {
-		this.setState({genre: event.target.value})
-		console.log(event.target.value);
-	};
+		this.setState({genre: event.target.value}, function () {
+    	selected_genre = this.state.genre;
+    	console.log(selected_genre);
+});
+};
 
-	onButtonSubmit = () =>{
-		var parsed = queryString.parse(window.location.hash);
-		var accessToken = parsed.access_token;
-		console.log(accessToken);
+getAccessToken(){
+	let parsed = queryString.parse(window.location.hash);
+	 accessToken = parsed.access_token;
+	
+	return accessToken;
+}
 
-		var url = "https://api.spotify.com/v1/recommendations/";
-	    var bearer = 'Bearer '+ accessToken;
-	    fetch(url,
-	    { method: 'GET',
-	     headers: new Headers({
-	     	'Authorization': 'Bearer ' + accessToken,
-	     	'Content-Type': 'application/json',
-			'Accept': 'application/json'
+	getTopArtists= async() =>{ 
+			var url = "https://api.spotify.com/v1/me/top/artists?limit=50";
+			var access_token = this.getAccessToken();
+	    	const response = await fetch(url,
+	    	{ method: 'GET',
 
-  		  
+	    	 headers: new Headers({
+	     	'Authorization': 'Bearer ' + access_token
   		})
-	    }).then(function(data) {
-    			console.log("The playlist contains these tracks", data.json());
-  			}, function(err) {
-   				 console.error(err);
-  			})
-  	}//end on onsubmit
+	    }).then(response => {
+	   		if(response.ok){
+	   			return response.json();
+	   		}
+	   		throw new Error('Request failed')
+	    })
+	    .then(jsonResponse =>{
+	    	if(jsonResponse.total ==0){
+	    		return [];
+	    	}
+	    	//console.log(this.state.topArtistsIDs);
+	    	return jsonResponse.items.map((artist) =>({
+	   			id: artist.id,
+				// name: artist.name,	
+				// genres: artist.genres
+	     	}))
+	    })
+			return response;
+	    }//end of get Top Artists
+	   
 
 
-	
-		/*if(accessToken){
-			SpotifyWebApi.setAccessToken(accessToken)
-			console.log("true");
-		}*/
+	 search = async() =>{
+		var access_token = this.getAccessToken();
+		var firstArtist;
+		var secondArtist;
+		var thirdArtist;
+		var forthArtist;
+		var fifthArtist;
+		var idArray =[];
 
-		/*fetch('https://api.spotify.com/v1/recommendations',{
-			method: 'get',
-				headers: {
-				'Authorization': 'Bearer ' + accessToken,
-				'Content-Type': 'application/json',
-				'Accept': 'application/json'
-			},
-			seed_genres: 'afrobeat'
-
-		})
-			 .then(function(data) {
-    			console.log("The playlist contains these tracks", data.json());
-  			}, function(err) {
-   				 console.error(err);
-  			});*/
-		/*var options = {
-			url: 'https://api.spotify.com/v1/recommendations',
-			headers: {
-				'Authorization': 'Bearer' + accessToken,
-				'Content-Type': 'application/json',
-				'Accept': 'application/json'
-			},
+		this.getTopArtists().then(results => {
+		for(var i =0; i< 50; i++){
+			  idArray.push(results[i].id);
+			 this.setState({topArtistsIDs: idArray}); 
+		}
+		 
+		});
+		console.log(this.state.topArtistsIDs);
+		firstArtist = this.state.topArtistsIDs[0];
+		secondArtist = this.state.topArtistsIDs[1];
+		thirdArtist = this.state.topArtistsIDs[2];
+		forthArtist = this.state.topArtistsIDs[3];
+		fifthArtist = this.state.topArtistsIDs[4];
+		console.log(this.state.topArtistsIDs[0]);
 		
-			//json: true
-		};*/
-	
+			
+	//target_valence=${ valence }&target_danceability=${ danceability }&seed_genre=${ selected_genre }
+	var url = `https://api.spotify.com/v1/recommendations?seed_artists=4NHQUGzhtTLFvgF5SZesLK&min_popularity=50&market=US&limit=8`;
+	    var bearer = 'Bearer '+ access_token;
+	    const response = await fetch(url,
+	    { method: 'GET',
+
+	     headers: new Headers({
+	     	'Authorization': 'Bearer ' + accessToken
+  		})
+	    }).then(response => {
+	    	if(response.ok){
+	    		return response.json();
+	    	}
+	    throw new Error('Request failed');
+	    })
+	    .then(jsonResponse => {
+	    	if(!jsonResponse.tracks){
+	    		return [];
+	    	}
+	    	this.setState({ searchResults: jsonResponse.tracks});
+	    	console.log(jsonResponse.tracks);
+	     	return jsonResponse.tracks.map((track) =>({
+	    		id: track.id,
+				name: track.name,
+				artist: track.artists[0].name,
+				album: track.album.name,
+				uri: track.uri,
+				image: track.album.images[0].url
+				
+	     	}));
+  	})
+	    return response;	
+  	};//end on search
+
+ 
+onButtonSubmit = () =>{
 		
-		/*fetch('https://api.spotify.com/v1/recommendations',
-			{
-				method: "get",
-				headers: {
-				'Authorization': 'Bearer' + accessToken
-				},
-			})
-			 .then(function(data){
-    			console.log("The playlist contains these tracks", data.body);
-  			}, function(err) {
-   				 console.error(err);
-  			});*/
-
-
-
-
-
-		
-		/*SpotifyWebApi.getRecommendations({limit:8, min_energy: 0.4, seed_genres: ['country'], min_popularity:50, 'Authorization': 'Bearer ' + accessToken,})
-		 .then(
-    		function(data) {
-     	     console.log('The playlist contains these tracks', data.body);
-   		 },
-    	function(err) {
-     	 console.log('Something went wrong!', err);
-    	}
-  		);*/
-  		//this.getRecommendations();
-	
-	/*getRecommendations(){
-		var options = {
-			headers: {
-				'Authorization': 'Bearer' + this.accessToken,
-				'Content-Type': 'application/json',
-				'Accept': 'application/json'
-			},
-			seed_genres: 'afrobeat',
-			limit: 8,
-			json: true
-		};
-		fetch('https://api.spotify.com/v1/recommendations',{options})
-			 .then(function(data) {
-    			console.log("The playlist contains these tracks", data.body);
-  			}, function(err) {
-   				 console.error(err);
-  			});
-	}*/
-	
-
-	
-	
+  		this.search().then(results => {
+      	this.setState({searchResults: results});
+      	console.log(this.state.searchResults);
+    });
+  	} 
 
 	render(){
 		return(
@@ -208,15 +226,15 @@ class App extends Component{
 			<h1> Moodify </h1>
 			  <Particles className ='particles'
                 params={ particlesOptions } />
-			<InputForm 
-			onMoodSelect = {this.onMoodSelect}
-			onResolutionSelect = {this.onResolutionSelect}
-			onGenreSelect = {this.onGenreSelect}
-			onButtonSubmit ={this.onButtonSubmit}
-			  />
-			}
-			}
-			<Cards />
+				<InputForm 
+				
+						//onMoodSelect = {this.onMoodSelect}
+				onResolutionSelect = {this.onResolutionSelect}
+				onGenreSelect = {this.onGenreSelect}
+				onButtonSubmit ={this.onButtonSubmit} />
+				<TrackList searchResults = { this.state.searchResults }/>
+
+			
 			</div>
 			);
 	}
