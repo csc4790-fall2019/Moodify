@@ -26,7 +26,7 @@ const InputForm = ({onMoodSelect, onResolutionSelect, onGenreSelect, onButtonSub
  					 <option value="Resolution"> I want to feel...</option>
  						<option label="Even sadder" value="Even sadder">Even Sadder
   						</option>
-						 <option label="Dance" value="Dance">Dance
+						 <option label="Like Dancing" value="Like Dancing">Like Dancing
 						 </option>
 						 <option label="Mellow" value="Mellow">Mellow
 						 </option>

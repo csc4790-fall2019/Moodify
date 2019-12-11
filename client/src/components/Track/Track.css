@@ -1,11 +1,16 @@
 .card{
 	width: 20rem;
 	margin: 10px;
+
 }
 .card:hover{
 	box-shadow: 5px 10px 20px 1px rgba(0, 0, 0,0)!important;
 }
-
+.flex-container{
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+}
 .card-text{
 	font-size: 0.9rem;
 	padding: 0.4rem 1.9rem;
