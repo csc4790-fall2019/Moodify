@@ -14,12 +14,14 @@ const Track = (props) =>{
 		<div className = "card-body text-dark" id = { props.id }>
 			<h4 className = "card-title"> Track: { props.name } </h4>
 			<p className = "card-text text-secondary">Artist: { props.artist }</p>
-			<Iframe url="https://open.spotify.com/embed/track/6A9mKXlFRPMPem6ygQSt7z"
+			<Iframe url ={`https://open.spotify.com/embed/track/${props.id}`}
+					id ="playButton"
 					width="300"
 					height="100"
 					frameborder="0"
 					allowtransparency="true" 
 					allow="encrypted-media"/>
+	
 		</div>
 		
     </div>

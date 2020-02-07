@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Particles from 'react-particles-js';
 import './App.css';
-import Spotify from '../util/Spotify/Spotify';
 import InputForm from '../components/InputForm/InputForm';
 import queryString from 'query-string';
 import TrackList from '../components/TrackList/TrackList';
@@ -71,7 +70,7 @@ class App extends Component{
 	constructor(props){
 		super(props);
 		this.state ={
-			//loggedIn: accessToken ? true : false,
+			//should I be using state? 
 			mood: '',
 			resolution:'',
 			genre: '',
@@ -83,35 +82,31 @@ class App extends Component{
 		}
 	
 	onMoodSelect = (event) => {
-		this.setState({mood: event.target.value}, function () {
-   		 console.log(this.state.mood);
-	})
+		this.setState({mood: event.target.value});
 	};
 
 	onResolutionSelect = (event) =>{
-		this.setState({resolution: event.target.value},function () {
-			let resolution = this.state.resolution;
+		const resolution = event.target.value;
+		let valence;
+		let danceability;
+		let tempo;
 			if(resolution === 'Even sadder'){
 				valence = 0.1;
 				danceability = 0.1;
 			}
-
-			else if(resolution === 'Dance'){
+			else if(resolution === 'Like Dancing'){
 				valence = 0.9;
 				danceability = 0.9;
 			}
 			else if(resolution == 'Mellow'){
 				tempo = 60;
 			}
-    	
-});
-	};
+    	this.setState({resolution, valence, danceability, tempo});
+};
+	
 
-	onGenreSelect = (event) => {
-		this.setState({genre: event.target.value}, function () {
-    	selected_genre = this.state.genre;
-    	console.log(selected_genre);
-});
+onGenreSelect = (event) => {
+		this.setState({genre: event.target.value});
 };
 
 getAccessToken(){
@@ -121,104 +116,84 @@ getAccessToken(){
 	return accessToken;
 }
 
-	getTopArtists= async() =>{ 
+getTopArtists= async() =>{ 
 			var url = "https://api.spotify.com/v1/me/top/artists?limit=50";
 			var access_token = this.getAccessToken();
-	    	const response = await fetch(url,
-	    	{ method: 'GET',
-
+	    	const response = await fetch(url,{
+	    	 method: 'GET',
 	    	 headers: new Headers({
-	     	'Authorization': 'Bearer ' + access_token
+	     	   'Authorization': 'Bearer ' + access_token
   		})
-	    }).then(response => {
-	   		if(response.ok){
-	   			return response.json();
+	    });
+	   		if(!response.ok){
+	   			throw new Error("Request failed");
 	   		}
-	   		throw new Error('Request failed')
-	    })
-	    .then(jsonResponse =>{
+	    	const jsonResponse = await response.json();
 	    	if(jsonResponse.total ==0){
 	    		return [];
 	    	}
-	    	//console.log(this.state.topArtistsIDs);
-	    	return jsonResponse.items.map((artist) =>({
-	   			id: artist.id,
-				// name: artist.name,	
-				// genres: artist.genres
-	     	}))
-	    })
-			return response;
-	    }//end of get Top Artists
+	    
+	    	return jsonResponse.items.map(({id, name}) =>({
+	   			id,
+				name,
+				genres
+	     	}));
+	  
+	    }
 	   
 
 
 	 search = async() =>{
-		var access_token = this.getAccessToken();
-		var firstArtist;
-		var secondArtist;
-		var thirdArtist;
-		var forthArtist;
-		var fifthArtist;
-		var idArray =[];
+		const access_token = this.getAccessToken();
+		const {valence, danceability} = this.state; //genre
+		try{
+			const artists = await this.getTopArtists();
+			const artistIds = artists
+				.map(artist => artist.id)
+				.slice(0,5)
+				.join(",");
 
-		this.getTopArtists().then(results => {
-		for(var i =0; i< 50; i++){
-			  idArray.push(results[i].id);
-			 this.setState({topArtistsIDs: idArray}); 
+		let url = `https://api.spotify.com/v1/recommendations?seed_artists=${artistIds}&min_popularity=50&market=US&limit=8`;
+		if(valence){
+			url += `&target_valence=${valence}`;
 		}
-		 
+		if(danceability){
+			url += `&target_danceability=${danceability}`;
+		}
+		if(selected_genre){
+			url += `&seed_genre = ${selected_genre}`
+		}
+		const response = await fetch(url, {
+			method: "GET",
+			headers: new Headers({
+				Authorization: 'Bearer '+ access_token
+			})
 		});
-		console.log(this.state.topArtistsIDs);
-		firstArtist = this.state.topArtistsIDs[0];
-		secondArtist = this.state.topArtistsIDs[1];
-		thirdArtist = this.state.topArtistsIDs[2];
-		forthArtist = this.state.topArtistsIDs[3];
-		fifthArtist = this.state.topArtistsIDs[4];
-		console.log(this.state.topArtistsIDs[0]);
-		
-			
-	//target_valence=${ valence }&target_danceability=${ danceability }&seed_genre=${ selected_genre }
-	var url = `https://api.spotify.com/v1/recommendations?seed_artists=4NHQUGzhtTLFvgF5SZesLK&min_popularity=50&market=US&limit=8`;
-	    var bearer = 'Bearer '+ access_token;
-	    const response = await fetch(url,
-	    { method: 'GET',
-
-	     headers: new Headers({
-	     	'Authorization': 'Bearer ' + accessToken
-  		})
-	    }).then(response => {
-	    	if(response.ok){
-	    		return response.json();
-	    	}
-	    throw new Error('Request failed');
-	    })
-	    .then(jsonResponse => {
-	    	if(!jsonResponse.tracks){
-	    		return [];
-	    	}
-	    	this.setState({ searchResults: jsonResponse.tracks});
-	    	console.log(jsonResponse.tracks);
-	     	return jsonResponse.tracks.map((track) =>({
-	    		id: track.id,
-				name: track.name,
-				artist: track.artists[0].name,
-				album: track.album.name,
-				uri: track.uri,
-				image: track.album.images[0].url
-				
-	     	}));
-  	})
-	    return response;	
-  	};//end on search
+		if(!response.ok){
+			throw new Error("Requested failed");
+		}
+		const jsonResponse = await response.json();
+		if(!jsonResponse.tracks){
+			return [];
+		}
+		return jsonResponse.tracks.map(track => ({
+			id: track.id,
+			name: track.name,
+			artist: track.artists[0].name,
+			album: track.album.name,
+			uri: track.uri,
+			image:track.album.images[0].url
+		}));
+		}catch(e){
+			console.log('error');		
+		}
+		};//end on search
 
  
-onButtonSubmit = () =>{
-		
-  		this.search().then(results => {
-      	this.setState({searchResults: results});
-      	console.log(this.state.searchResults);
-    });
-  	} 
+onButtonSubmit = async() =>{
+	const results = await this.search();
+	this.setState({searchResults: results});
+  	};
 
 	render(){
 		return(
@@ -228,16 +203,15 @@ onButtonSubmit = () =>{
                 params={ particlesOptions } />
 				<InputForm 
 				
-						//onMoodSelect = {this.onMoodSelect}
+				onMoodSelect = {this.onMoodSelect}
 				onResolutionSelect = {this.onResolutionSelect}
-				onGenreSelect = {this.onGenreSelect}
+				//onGenreSelect = {this.onGenreSelect}
 				onButtonSubmit ={this.onButtonSubmit} />
-				<TrackList searchResults = { this.state.searchResults }/>
-
-			
+				{this.state.searchResults && (
+					<TrackList searchResults = { this.state.searchResults }/>
+				)}
 			</div>
 			);
 	}
-
 };
 export default App;

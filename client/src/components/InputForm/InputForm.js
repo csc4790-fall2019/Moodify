@@ -32,7 +32,7 @@ const InputForm = ({onMoodSelect, onResolutionSelect, onGenreSelect, onButtonSub
 						 </option>
   
 					</select>
-
+                    {/* The Genre is not necessary at this moment
                     <select id="types" className="w=30 grow f4 link ph3 pv2 dib white bg-light-purple" name="Genre"
                     onChange = {onGenreSelect}>
                      <option value="Genre">Choose the Genre</option>
@@ -60,8 +60,7 @@ const InputForm = ({onMoodSelect, onResolutionSelect, onGenreSelect, onButtonSub
                          </option>
                          <option label="Reggae" value="reggae">Reggae
                          </option>
-  
-                    </select>
+                    </select> */}
      			<button 
           			className = 'w=30 grow f4 link ph3 pv2 dib white bg-light-purple'
           			onClick = {onButtonSubmit}>
