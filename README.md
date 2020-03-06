@@ -1,11 +1,11 @@
 # Moodify
 For my senior capstone project, **I created a website called 'Moodify' where a user can get song suggestions
 based on what mood they are in currently and what mood they desire to be.**
-The website uses Spotify API to pull up tracks for the user. Hence, a user has to first login to their Spotify account(free or premium) so that the website has access to their Spotify data.
+The website uses Spotify API to pull up tracks for the user. A user has to first log in to their Spotify account(free or premium) so that the website has access to their Spotify data.
 The landing page presents the user with 2 drop down lists: one to pick their current mood (Sad, Low Energy, Happy) and their intended mood('Even sadder, Like Dancing, Mellow)
 
 In the backend, I use the [getrecommendations](https://developer.spotify.com/documentation/web-api/reference/browse/get-recommendations/) Spotify API method which generates song suggestions based on different seed parameters.
-One of the query parameters include up to 5 seed_artists, which I get by calling the 'get artists' endpoint.
+The query parameters include up to 5 seed_artists, which I get by calling the 'get artists' endpoint.
 For determing which songs are recommended,I use the audio features valence and danceability. Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.
 Valence is a measure from 0.0 to 1.0 describing the musical positiveness conveyed by a track. 
 Tracks with high valence sound more positive (e.g. happy, cheerful, euphoric), while tracks with low valence sound more negative (e.g. sad, depressed, angry).
