@@ -8,11 +8,8 @@ import 'tachyons';
 
 
 let selected_genre;
-let	valence;
-let	danceability;
-let tempo;
 let accessToken;
-let topArtistsIDs;
+
 
 const particlesOptions = {
  
@@ -94,20 +91,16 @@ class App extends Component{
 				valence = 0.1;
 				danceability = 0.1;
 			}
-			else if(resolution === 'Like Dancing'){
+			else if(resolution ==='Like Dancing'){
 				valence = 0.9;
 				danceability = 0.9;
 			}
-			else if(resolution == 'Mellow'){
+			else if(resolution === 'Mellow'){
 				tempo = 60;
 			}
     	this.setState({resolution, valence, danceability, tempo});
 };
 	
-
-onGenreSelect = (event) => {
-		this.setState({genre: event.target.value});
-};
 
 getAccessToken(){
 	let parsed = queryString.parse(window.location.hash);
@@ -129,14 +122,14 @@ getTopArtists= async() =>{
 	   			throw new Error("Request failed");
 	   		}
 	    	const jsonResponse = await response.json();
-	    	if(jsonResponse.total ==0){
+	    	if(jsonResponse.total ===0){
 	    		return [];
 	    	}
 	    
 	    	return jsonResponse.items.map(({id, name}) =>({
 	   			id,
 				name,
-				genres
+
 	     	}));
 	  
 	    }

@@ -8,7 +8,10 @@ const Track = (props) =>{
 		<div className = 'overflow'>
 		</div>
 		<img src = { props.image } style={{ height: 200 }}
-			className ="card-img-top"/>
+			className ="card-img-top"
+			alt="albumn cover"
+			/>
+
 
 
 		<div className = "card-body text-dark" id = { props.id }>
